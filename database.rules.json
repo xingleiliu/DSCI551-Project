@@ -1,0 +1,24 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": true,
+    "films": {
+      ".indexOn": [
+        "name"
+      ]
+    },
+    "actors": {
+      ".indexOn": [
+        "first_name",
+        "last_name",
+        "full_name"
+      ]
+    },
+    "hw1_data": {
+      ".indexOn": [
+        "name",
+        "full_name"
+      ]
+    }
+  }
+}
