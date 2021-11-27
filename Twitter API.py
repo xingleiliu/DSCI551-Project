@@ -10,7 +10,7 @@ import json
 import pandas as pd
 import numpy as np
 import os
-import nltk
+# import nltk
 # import pycountry
 import re
 import string
@@ -97,6 +97,7 @@ if __name__ == "__main__":
     data_tweet_json = json.dumps(data_tweet)
     print(data_tweet)
     requests.put(url="https://proj-aa3d9-default-rtdb.firebaseio.com/.json", json=data_tweet)
+    # requests.put(url="https://dsci-551-9dfe8-default-rtdb.firebaseio.com/.json", json=data_tweet)
     # if (first_score > sec_score):
     #     print(f"{first} wins!{first_score}")
     # else:

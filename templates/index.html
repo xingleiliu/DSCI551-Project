@@ -9,11 +9,11 @@
 
     <p>Please upload a csv file for description and sentiment analysis</p>
 
-    <form>
+    <form method=post enctype=multipart/form-data>
       <input type="file"
              id="text" name="data"
              accept="text/csv">
-      <input type="submit">
+      <input type="submit" id="text-submit" name="text-submit">
     </form>
 
     <p>Analysis: </p>
@@ -26,16 +26,25 @@
 
     <p>Please upload an image for description and sentiment analysis</p>
 
-    <form>
+    <form method=post enctype=multipart/form-data>
       <input type="file"
              id="image" name="image"
              accept="image/*">
-      <input type="submit">
+      <input type="submit" id="image-submit" name="image-submit" value=Upload>
     </form>
 
     <p>Analysis: </p>
     <div>
-        <p> [Placeholder for image description] </p>
+        <div id="container">
+            <img src="{{ url_for('display_image', name=filename) }}" width="300" height="300">
+        </div>
+        <script type="text/javascript">
+            function getFilename()
+            {
+                var filename = document.getElementById('image');
+                alert(filename.value);
+            }
+        </script>
         <p>Sentiment Score: 0</p>
     </div>
 
