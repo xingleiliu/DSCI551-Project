@@ -6,22 +6,16 @@ import preprocessor as p
 import statistics
 import requests
 import json
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import os
-# import nltk
-# import pycountry
+import nltk
 import re
 import string
 from typing import List
-# from wordcloud import WordCloud, STOPWORDS
-# from PIL import Image
-# from nltk.sentiment.vader import SentimentIntensityAnalyzer
-# from langdetect import detect
-# from nltk.stem import SnowballStemmer
-# from nltk.sentiment.vader import SentimentIntensityAnalyzer
-# from sklearn.feature_extraction.text import CountVectorizer
+from wordcloud import WordCloud, STOPWORDS
+from PIL import Image
 
 consumer_key = "eTaweaYCyXZJCqbW9VGcTRR1u"
 consumer_secret = "If8dXEW9L1nYgvJbbxZWjmdvn3UALYLgXceFiQFpRPQ6M1JKOK"
@@ -33,7 +27,7 @@ data = {}
 
 def get_tweets(keyword: str) -> List[str]:
     all_tweets = []
-    for tweet in tweepy.Cursor(api.search_tweets, q=keyword, tweet_mode='extended', lang="en", result_type="popular").items(10):
+    for tweet in tweepy.Cursor(api.search_tweets, q=keyword, tweet_mode='extended', lang="en", result_type="popular").items(100):
         all_tweets.append(tweet.full_text)
     for i in range(len(all_tweets)):
         data[i] = {}
@@ -81,27 +75,70 @@ def avg_sentiment(keyword: str) -> int:
     return avg
 # print(avg_sentiment("USC"))
 
+def inputs():
+    list = []
+    print("Please input two keywords:")
+    first = input()
+    list.append(first)
+    sec = input()
+    list.append(sec)
+    print()
+    return list
+
+def wc(text, num):
+    mask = np.array(Image.open("cloud.png"))
+    stopwords = set(STOPWORDS)
+    wc = WordCloud(background_color="white",
+                  mask = mask,
+                  max_words=3000,
+                  stopwords=stopwords,
+                  repeat=True)
+    wc.generate(str(text))
+    if num == 1:
+        wc.to_file("wc1.png")
+        path = "wc1.png"
+        # display(Image.open(path))
+        print("Word Cloud1 Saved Successfully")
+    else:
+        wc.to_file("wc2.png")
+        path = "wc2.png"
+        # display(Image.open(path))
+        print("Word Cloud2 Saved Successfully")
+
+# print(wc(clean_tweets(get_tweets("USC")), 2))
+
 if __name__ == "__main__":
-    # print("two inputs")
-    # first = input()
-    # sec = input()
-    # print()
-    first = "USC"
+    # first = "USC"
     # sec = "UCLA"
+    # print(inputs())
+    keywords = inputs()
+    first = keywords[0]
+    sec = keywords[1]
 
+    #####first keyword dict###########
     first_score = avg_sentiment(first)
-    # sec_score = avg_sentiment(sec)
+    first_dict = {}
+    first_dict[first] = data
+    requests.put(url="https://proj-aa3d9-default-rtdb.firebaseio.com/.json", json=first_dict)
+    # print(f"Number of tweets of the first keywords: {len(data)}")
 
-    data_tweet = {}
-    data_tweet["Tweets"] = data
-    data_tweet_json = json.dumps(data_tweet)
-    print(data_tweet)
-    requests.put(url="https://proj-aa3d9-default-rtdb.firebaseio.com/.json", json=data_tweet)
-    # requests.put(url="https://dsci-551-9dfe8-default-rtdb.firebaseio.com/.json", json=data_tweet)
-    # if (first_score > sec_score):
-    #     print(f"{first} wins!{first_score}")
-    # else:
-    #     print(f"{sec} wins!{sec_score}")
+    ####second keyword dict###########
+    sec_dict = {}
+    sec_score = avg_sentiment(sec)
+    sec_dict[sec] = data
+    requests.patch(url="https://proj-aa3d9-default-rtdb.firebaseio.com/.json", json=sec_dict)
+    # print(f"Number of tweets of the second keywords: {len(data)}")
+    # print(sec_dict)
+
+    ########print winner############
+    if (first_score > sec_score):
+        print(f"{first} wins! Sentiment score is {first_score}")
+    else:
+        print(f"{sec} wins! Sentiment score is {sec_score}")
+
+    ########plot wordcloud#######
+    wc(clean_tweets(get_tweets(first)), 1)
+    wc(clean_tweets(get_tweets(sec)), 2)
 
 
 
