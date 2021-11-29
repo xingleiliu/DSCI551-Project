@@ -35,7 +35,6 @@
     }
     h1 {text-align: center; color:#990000; padding-top: 200px}
     p {text-align: center; color:#990000;}
-    pre {color:#990000;}
 <!--    div {text-align: center; color:#990000;}-->
     form {text-align: center; color:#990000;}
     .container {
@@ -92,55 +91,47 @@
       transition-duration: 0.4s;
       cursor: pointer;
     }
-    .button:hover {
-      background-color: #eeeee4;
-    }
-    .button1 {
-      float: left;
-      width: 30%;
-    }
-
-    .button2 {
-      float: right;
-      width: 30%;
+    .center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+      width: 50%;
     }
     </style>
 </head>
 <body>
     <div class="topnav">
-        <a class="active" href="/">Home</a>
-      <a href="/json">JSON</a>
+        <a href="/">Home</a>
+      <a class="active" href="/json">JSON</a>
       <a href="/image">Image</a>
     </div>
     <h1>Sentiment Analysis Comparing Two Keywords on Twitter</h1>
 
-    <p>Please enter two keywords</p>
+    <p>Please upload a json file for description and sentiment analysis</p>
 
-    <form method=post>
-      <label>First keyword:</label><br>
-      <input type="text" name="first"><br>
-      <label>Second keyword:</label><br>
-      <input type="text" name="sec"><br><br>
-      <input type="submit" name="keyword-submit">
+    <form method=post enctype=multipart/form-data>
+      <input type="file"
+             id="text" name="data"
+             accept=".json">
+      <input type="submit" id="text-submit" name="text-submit" value=Upload>
     </form>
 
-
-
-    {% if firstjson %}
-<!--    <object class="object" type="text/html">-->
+<!--    <object type="text/html" data="https://proj-aa3d9-default-rtdb.firebaseio.com/.json">-->
 <!--    </object>-->
-<!--    <script>-->
-<!--        var element = document.querySelector(".object");-->
-<!--        element.setAttribute("data", {{ firstjson }});-->
-<!--        element.setAttribute("disabled", "");-->
-<!--    </script>-->
-    <p>Result: {{ message }}</p>
-    <pre>                             Tweets for {{ fkw }}                                                               Tweets for {{ skw }}</pre>
-    <div class="container" id="container">
+
+    {% if secondjson %}
+    <p>Result: </p>
+    <p>{{ message }}</p>
+    <div>
+        <pre> Raw data                                                               Processed data</pre>
+
+
+        <div class="container" id="container">
         <pre class="leftjson" id="first"></pre>
         <pre class="rightjson" id="second"></pre>
     </div>
         <script>
+
           const firstjson = JSON.parse({{firstjson|tojson}});
           console.log(firstjson);
           document.querySelector(".leftjson").textContent = JSON.stringify(firstjson, null, 4);
@@ -149,15 +140,28 @@
           console.log(secondjson);
           document.querySelector(".rightjson").textContent = JSON.stringify(secondjson, null, 4);
         </script>
+        <center>
+            <p>Metadata: </p>
+            <table>
+                <tr>
+                    <th>File size</th>
+                    <th>{{ size }} Bytes</th>
+                </tr>
+                <tr>
+                    <th>Number of Tweets</th>
+                    <th>{{ rows }}</th>
+                </tr>
+            </table>
+        </center>
+<!--        <p>File size: {{ size }}</p>-->
+<!--        <p>Number of Tweets: {{ rows }}</p>-->
 
-    {% if fkw == "Cat" %}
-    <button class="button button1" onclick="show_image('tagcloud1', 610, 500, 'Tag Cloud');">Generate Tag Cloud for {{ fkw }}</button>
-    <button class="button button2" onclick="show_image('tagcloud2', 610, 500, 'Tag Cloud');">Generate Tag Cloud for {{ skw }}</button>
-    {% else %}
-    <button class="button button1" onclick="show_image('tagcloud11', 610, 500, 'Tag Cloud');">Generate Tag Cloud for {{ fkw }}</button>
-    <button class="button button2" onclick="show_image('tagcloud22', 610, 500, 'Tag Cloud');">Generate Tag Cloud for {{ skw }}</button>
+
+    </div>
+    <center>
+        <button class="button" onclick="show_image('tagcloud3', 1250, 900, 'Tag Cloud');">Generate Tag Cloud</button>
+    </center>
     {% endif %}
-
 
     <script>
         function show_image(src, width, height, alt) {
@@ -171,11 +175,6 @@
         document.body.appendChild(img);
     }
     </script>
-    {% endif %}
-
-
-
-
 
 </body>
 </html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DSCI551 Project</title>
+    <style>
+    .topnav {
+      overflow: hidden;
+    }
+
+    .topnav a {
+      float: right;
+      color: #f2f2f2;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+      font-size: 17px;
+    }
+
+    .topnav a:hover {
+      background-color: #eeeee4;
+      color: black;
+    }
+
+    .topnav a.active {
+      background-color: #eeeee4;
+      color: #990000;
+    }
+    body {
+      background-image: url('USC-Gold-Architecture.jpg');
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      background-size: cover;
+      font-family: 'Trebuchet MS', sans-serif;
+    }
+    h1 {text-align: center; color:#990000; padding-top: 200px}
+    p {text-align: center; color:#990000;}
+<!--    div {text-align: center; color:#990000;}-->
+    form {text-align: center; color:#990000;}
+    .container {
+        background-color:white;
+        text-align: left;
+    }
+    table {
+      font-family: arial, sans-serif;
+      border-collapse: collapse;
+      color:#990000;
+    }
+
+    td, th {
+      border: 1px solid #eeeee4;
+      text-align: left;
+      padding: 8px;
+    }
+
+    tr:nth-child(even) {
+      border: 1px solid #eeeee4;
+      text-align: left;
+      padding: 8px;
+    }
+    </style>
+</head>
+<body>
+    <div class="topnav">
+        <a href="/">Home</a>
+        <a href="/json">JSON</a>
+      <a class="active" href="/image">Image</a>
+    </div>
+    <h1>Sentiment Analysis Comparing Two Keywords on Twitter</h1>
+
+
+    <p>Please upload an image for metadata</p>
+
+    <form method=post enctype=multipart/form-data>
+      <input type="file"
+             id="image" name="image"
+             accept="image/*">
+      <input type="submit" id="image-submit" name="image-submit" value=Upload>
+    </form>
+
+    {% if filename %}
+        <div>
+            <div id="container">
+                <img src="{{ url_for('display_image', name=filename) }}" width="400" height="400">
+            </div>
+            <p>Metadata: </p>
+        </div>
+        <center>
+            <table>
+            {% for key, value in metadata.items() %}
+               <tr>
+                    <th> {{ key }} </th>
+                    <td> {{ value }} </td>
+               </tr>
+            {% endfor %}
+            </table>
+        </center>
+    {% endif %}
+
+</body>
+</html>
