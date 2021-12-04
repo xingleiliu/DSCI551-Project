@@ -1,8 +1,3 @@
-import matplotlib.pyplot as plt
-
-plt.ioff()
-import numpy as np
-
 import os
 from flask import Flask, flash, request, redirect, url_for, send_file, render_template
 from flask import send_from_directory
@@ -16,6 +11,11 @@ import numpy as np
 import twitter
 from geopy.geocoders import Nominatim
 from GPSPhoto import gpsphoto
+from pyspark.context import SparkContext
+from pyspark.sql.session import SparkSession
+sc = SparkContext('local')
+spark = SparkSession(sc)
+spark.sparkContext.setLogLevel("WARN")
 
 keyword1 = None
 keyword2 = None
@@ -41,24 +41,16 @@ realtime_database_url = "https://proj-aa3d9-default-rtdb.firebaseio.com/"
 UPLOAD_FOLDER = 'C:/Users/jenny/OneDrive/Desktop/USC/Fall 2021/DSCI 551/Project/uploads'
 ALLOWED_EXTENSIONS = {'json', 'csv', 'txt', 'png', 'jpg', 'jpeg'}
 
+# initialize flask app
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# with open('uploads/firebase.json') as f:
-#     jsondata = json.load(f)
-# hey = requests.put(url=database_url + 'firebase.json', json=jsondata)
-# print(hey)
 
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-# @app.route('/data')
-# def display_data(name):
-#     file_url = database_url + name
-#     return
 
 @app.route('/USC-Gold-Architecture.jpg')
 def background():
@@ -86,11 +78,7 @@ def enter_keywords():
         secondjson = requests.get(second).json()
         # first_score = np.mean([row['sentiment_scores'] for row in firstjson])
         # second_score = np.mean([row['sentiment_scores'] for row in firstjson])
-
         return render_template("index.html", firstjson=json.dumps(firstjson, indent=4), secondjson=json.dumps(secondjson), fkw=f, skw=s, message=message)
-    # if "keyword-submit" in request.form:
-    #     print("there is user input")
-
     return render_template("index.html")
 
 
@@ -101,7 +89,6 @@ def upload_file():
             data = request.files['data']
 
             if data and allowed_file(data.filename):
-                print(data)
                 filename = secure_filename(data.filename)
                 path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 data.save(path)
@@ -113,7 +100,6 @@ def upload_file():
                 requests.put(url=database_url + filename, json=jsondata)
                 rows = len(jsondata)
                 # return redirect(url_for('display_image', name=filename))
-                # firstjson=json.dumps(jsondata),
                 return render_template("json.html", firstjson=json.dumps(jsondata), secondjson=json.dumps(new_jsondata), message=message, rows=rows, size=size)
     return render_template("json.html")
 
@@ -128,21 +114,22 @@ def upload_image():
                 path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 image.save(path)
 
+                # spark
+                image_df = spark.read.format("image").load(path)
+                width, height = image_df.select("image.width", "image.height").show()
+
+                print(width, height)
+
                 img = Image.open(path)
-
-
                 exif = {TAGS[k]: v for k, v in img.getexif().items() if k in TAGS}
 
                 # initialize Nominatim API
                 geolocator = Nominatim(user_agent="geoapiExercises")
-
                 gpsdata = gpsphoto.getGPSData(path)
-                # Latitude & Longitude input
+
                 Latitude = str(gpsdata['Latitude'])
                 Longitude = str(gpsdata['Longitude'])
-
                 location = geolocator.reverse(Latitude + "," + Longitude)
-
                 address = location.raw['address']
 
                 output = {}
@@ -153,32 +140,33 @@ def upload_image():
                 output["DateTime"] = exif["DateTime"]
                 output["Size (Height x Length)"] = (exif["ExifImageHeight"], exif["ImageLength"])
 
+
                 storage.child(filename).put(path)
                 return render_template("image.html", filename=filename, metadata=output)
     return render_template("image.html")
 
 
-@app.route('/tagcloud1')
+@app.route('/wordcloud1')
 def cloud1():
     return send_file("wc11.png")
 
 
-@app.route('/tagcloud2')
+@app.route('/wordcloud2')
 def cloud2():
     return send_file("wc22.png")
 
 
-@app.route('/tagcloud11')
+@app.route('/wordcloud11')
 def cloud11():
     return send_file("wc1.png")
 
 
-@app.route('/tagcloud22')
+@app.route('/wordcloud22')
 def cloud22():
     return send_file("wc2.png")
 
 
-@app.route('/tagcloud3')
+@app.route('/wordcloud3')
 def cloud3():
     return send_file("wc3.png")
 
